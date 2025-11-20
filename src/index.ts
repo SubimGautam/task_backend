@@ -12,7 +12,7 @@ let nextId = 3;
 
 // GET all users - 
 app.get('/api/users', (req, res) => {
-  res.json(users);
+  return res.json(users);
 });
 
 // GET single user - 
@@ -21,39 +21,43 @@ app.get('/api/users/:id', (req, res) => {
   const user = users.find(u => u.id === id);
   
   if (!user) {
-    res.status(404).json({ error: 'User not found' });
-    return;
+    return res.status(404).json({ error: 'User not found' });
+    
   }
   
-  res.json(user);
+  return res.json(user);
 });
 
 // POST new user - 
 app.post('/api/users', (req, res) => {
-  const { username, email, name, age } = req.body;
+  const { id, username, email, name, age } = req.body;
   
   
-  if (!username || !email || !name) {
-    res.status(400).json({ error: 'Username, email, and name are required' });
-    return;
+  if (!id || !username || !email || !name) {
+    return res.status(400).json({ error: 'Id, Username, email, and name are required' });
+    
   }
   
-  
+  const existingUserById = users.find(u => u.id === id);
+  if (existingUserById) {
+    return res.status(409).json({ error: 'User ID already exists' });
+    
+  } 
   const existingUserByEmail = users.find(u => u.email === email);
   if (existingUserByEmail) {
-    res.status(409).json({ error: 'Email already exists' });
-    return;
+    return res.status(409).json({ error: 'Email already exists' });
+    
   }
   
   const existingUserByUsername = users.find(u => u.username === username);
   if (existingUserByUsername) {
-    res.status(409).json({ error: 'Username already exists' });
-    return;
+    return res.status(409).json({ error: 'Username already exists' });
+    
   }
   
   
   const newUser = {
-    id: nextId++,
+    id: id,
     username,
     email,
     name,
@@ -61,7 +65,7 @@ app.post('/api/users', (req, res) => {
   };
   
   users.push(newUser);
-  res.status(201).json(newUser);
+  return res.status(201).json(newUser);
 });
 
 // PUT update user - 
@@ -72,27 +76,27 @@ app.put('/api/users/:id', (req, res) => {
   const userIndex = users.findIndex(u => u.id === id);
   
   if (userIndex === -1) {
-    res.status(404).json({ error: 'User not found' });
-    return;
+    return res.status(404).json({ error: 'User not found' });
+    
   }
   
   
   if (!username || !email || !name) {
-    res.status(400).json({ error: 'Username, email, and name are required' });
-    return;
+    return res.status(400).json({ error: 'Username, email, and name are required' });
+    
   }
   
   
   const existingUserByEmail = users.find(u => u.email === email && u.id !== id);
   if (existingUserByEmail) {
-    res.status(409).json({ error: 'Email already exists' });
-    return;
+    return res.status(409).json({ error: 'Email already exists' });
+    
   }
   
   const existingUserByUsername = users.find(u => u.username === username && u.id !== id);
   if (existingUserByUsername) {
-    res.status(409).json({ error: 'Username already exists' });
-    return;
+    return res.status(409).json({ error: 'Username already exists' });
+    
   }
   
   
@@ -104,7 +108,7 @@ app.put('/api/users/:id', (req, res) => {
     age: age || users[userIndex].age
   };
   
-  res.json(users[userIndex]);
+  return res.json(users[userIndex]);
 });
 
 // DELETE user - 
@@ -113,13 +117,13 @@ app.delete('/api/users/:id', (req, res) => {
   const userIndex = users.findIndex(u => u.id === id);
   
   if (userIndex === -1) {
-    res.status(404).json({ error: 'User not found' });
-    return;
+    return res.status(404).json({ error: 'User not found' });
+    
   }
   
   
   users.splice(userIndex, 1);
-  res.status(204).send();
+  return res.status(204).send();
 });
 
 const PORT = 3000;
